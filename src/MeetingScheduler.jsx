@@ -1,24 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { List, ListItem, ListItemButton, ListItemText, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from '@mui/material';
 import { z } from 'zod';
+import axios from 'axios'
+import { DateTime } from 'luxon';
+import generateTimeSlots from '../server/utils/timeUtils'
 
-// generateTime will generate Date and change the hours from begin to end.
-const generateTimeSlots = (start, end, interval) => {
-  const slots = [];
-  let current = new Date();
-  current.setHours(start, 0, 0, 0);
-  const endTime = new Date();
-  endTime.setHours(end, 0, 0, 0);
-
-
-  // while loop, convert date to time (hours:minutes), push it to slots array, convert it to time (ms), added intervall in ms, and then reconvert it to date
-  while (current <= endTime) {
-    slots.push(current.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    current = new Date(current.getTime() + interval * 60000);
-    
-  }
-  return slots;
-};
 
 const MeetingScheduler = () => {
 
@@ -27,7 +13,27 @@ const MeetingScheduler = () => {
     email: z.string().min(1, 'Email is required').email('Invalid email address'),
   });
 
+  useEffect(() => {
+    const testApi = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/available-slots?startHour="+10+"&endHour="+15+"&intervalMinutes="+15);
+        console.log("response of testApi ", response);
+        // setTimeSlots(response.data)
+        
+        
+      } catch (error) {
+        console.error("Error fetching API", error);
+      }
+    };
+
+    testApi();
+
+
+  }, []);
+
+
   const timeSlots = generateTimeSlots(10, 15, 15);
+  //const [timeSlots, setTimeSlots] = useState([])
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
